@@ -4,6 +4,12 @@
 
 Revive a 2015 word clock project for Chelsea (wife, birthday May 4th). The clock displays time in English words on a laser-cut birch panel using white LEDs. A birthday mode activates on May 4th displaying "HAPPY BIRTH DAY CHELSEA".
 
+## Design Principles
+
+1. **Simple** — No clever abstractions. Each file does one thing. Code reads like what it does: "if it's quarter past, turn on QUARTER and PAST." Prefer obvious and verbose over compact and clever.
+2. **Well-tested** — Core logic (time → words) tested natively on macOS without hardware. Hardware integration tested incrementally via a progression of test sketches, each validating one layer before moving to the next.
+3. **Easy to maintain** — Pin assignments in one config file. If an LED burns out or a MOSFET module dies, swap the part and change one line. No hidden dependencies between modules.
+
 ## Hardware
 
 ### Existing (keeping)
@@ -41,7 +47,7 @@ Row 4:  N H A P P Y P A S T T O D
 Row 5:  O N E B I R T H T H R E E
 Row 6:  E L E V E N F O U R D A Y
 Row 7:  T W O E I G H T S E V E N
-Row 8:    N I N E S I X T W E L V E
+Row 8:  N I N E S I X T W E L V E
 Row 9:  C H E L S E A R W F I V E
 Row 10: T E N O C L O C K A M P M
 ```
