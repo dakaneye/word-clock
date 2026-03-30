@@ -1,7 +1,12 @@
 // test-sketches/word-test/word-test.ino
 // Type a word name in Serial Monitor to light it up.
 // Type "all" to light all words. Type "off" to turn all off.
+//
+// WORD_PINS is duplicated here because Arduino IDE copies sketches to a
+// temp directory before compiling, breaking relative #include paths.
+// If you change pin assignments in config.cpp, update this file too.
 
+// Lowercase names for easy serial input
 const char* WORD_NAMES[] = {
   "itis", "tenmin", "half", "quarter", "twenty", "fivemin",
   "minutes", "past", "to", "one", "two", "three", "four",

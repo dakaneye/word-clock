@@ -14,14 +14,14 @@ void setup() {
   buttonsInit();
 
   if (!clockInit()) {
-    Serial.println("ERROR: DS3231 RTC not found!");
-    // Flash all words as error indicator
-    for (int i = 0; i < NUM_WORDS; i++) {
-      displayWordOn(i);
+    Serial.println("ERROR: DS3231 RTC not found! Check wiring: SDA=20, SCL=21");
+    // Halt with infinite blink — do not proceed with garbage time data
+    while (true) {
+      for (int i = 0; i < NUM_WORDS; i++) displayWordOn(i);
+      delay(500);
+      displayClear();
+      delay(500);
     }
-    delay(1000);
-    displayClear();
-    delay(1000);
   }
 
   Serial.println("Word Clock ready.");

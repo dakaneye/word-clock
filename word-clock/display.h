@@ -17,7 +17,4 @@ void displayShow(const WordSet& ws);
 // Turn on a single word by index (for testing)
 void displayWordOn(int word);
 
-// Turn off a single word by index (for testing)
-void displayWordOff(int word);
-
 #endif

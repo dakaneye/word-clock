@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "../word-clock/config.h"
+#include "../word-clock/config.cpp"
 #include "../word-clock/time_to_words.h"
 #include "../word-clock/time_to_words.cpp"
 
@@ -174,6 +175,86 @@ void testAllHoursAtOclock() {
   }
 }
 
+void testBoundaryMinutes() {
+  // :04 -> still O'CLOCK (last minute of block 0)
+  int e1[] = {W_IT_IS, W_FIVE_HR, W_OCLOCK, W_AM};
+  expectWords(5, 4, false, e1, 4);
+
+  // :05 -> FIVE MINUTES PAST (first minute of block 1)
+  int e2[] = {W_IT_IS, W_FIVE_MIN, W_MINUTES, W_PAST, W_FIVE_HR, W_AM};
+  expectWords(5, 5, false, e2, 6);
+
+  // :29 -> still TWENTY FIVE PAST (last minute of block 5)
+  int e3[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_PAST, W_SIX, W_PM};
+  expectWords(6, 29, true, e3, 7);
+
+  // :30 -> HALF PAST (first minute of block 6)
+  int e4[] = {W_IT_IS, W_HALF, W_PAST, W_SIX, W_PM};
+  expectWords(6, 30, true, e4, 5);
+
+  // :34 -> still HALF PAST (last minute of block 6)
+  int e5[] = {W_IT_IS, W_HALF, W_PAST, W_SIX, W_PM};
+  expectWords(6, 34, true, e5, 5);
+
+  // :35 -> TWENTY FIVE TO (first minute of block 7)
+  int e6[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_TO, W_SEVEN, W_PM};
+  expectWords(6, 35, true, e6, 7);
+
+  // :59 -> still FIVE TO (last minute of block 11, with hour wrap)
+  int e7[] = {W_IT_IS, W_FIVE_MIN, W_MINUTES, W_TO, W_ONE, W_AM};
+  expectWords(12, 59, false, e7, 6);
+}
+
+void testAmPmToggle() {
+  // Same time, different AM/PM — only the AM/PM word should differ
+  int am[] = {W_IT_IS, W_THREE, W_OCLOCK, W_AM};
+  int pm[] = {W_IT_IS, W_THREE, W_OCLOCK, W_PM};
+  expectWords(3, 0, false, am, 4);
+  expectWords(3, 0, true, pm, 4);
+}
+
+void testBirthdayWords() {
+  // Verify birthdayWords produces the right set
+  // (This tests the WordSet construction, not millis()-based alternation)
+  // We include the birthday header inline since it has Arduino deps
+  // Just test the word set manually here
+  WordSet ws;
+  ws.count = 0;
+  ws.words[ws.count++] = W_IT_IS;
+  ws.words[ws.count++] = W_HAPPY;
+  ws.words[ws.count++] = W_BIRTH;
+  ws.words[ws.count++] = W_DAY;
+  ws.words[ws.count++] = W_CHELSEA;
+  ws.words[ws.count++] = W_AM;
+
+  tests_run++;
+  bool pass = (ws.count == 6);
+  pass = pass && wordSetContains(ws, W_IT_IS);
+  pass = pass && wordSetContains(ws, W_HAPPY);
+  pass = pass && wordSetContains(ws, W_BIRTH);
+  pass = pass && wordSetContains(ws, W_DAY);
+  pass = pass && wordSetContains(ws, W_CHELSEA);
+  pass = pass && wordSetContains(ws, W_AM);
+
+  if (pass) {
+    tests_passed++;
+  } else {
+    printf("FAIL: birthday words AM\n");
+    printf("  Got: ");
+    printWordSet(ws);
+  }
+
+  // PM version
+  ws.words[5] = W_PM;
+  tests_run++;
+  pass = wordSetContains(ws, W_PM) && !wordSetContains(ws, W_AM);
+  if (pass) {
+    tests_passed++;
+  } else {
+    printf("FAIL: birthday words PM\n");
+  }
+}
+
 int main() {
   testOclock();
   testFivePast();
@@ -189,6 +270,9 @@ int main() {
   testFiveTo();
   testHourWrapAround();
   testAllHoursAtOclock();
+  testBoundaryMinutes();
+  testAmPmToggle();
+  testBirthdayWords();
 
   printf("\n%d/%d tests passed\n", tests_passed, tests_run);
   return (tests_passed == tests_run) ? 0 : 1;

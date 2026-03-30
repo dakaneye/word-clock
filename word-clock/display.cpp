@@ -18,18 +18,15 @@ void displayClear() {
 void displayShow(const WordSet& ws) {
   displayClear();
   for (int i = 0; i < ws.count; i++) {
-    digitalWrite(WORD_PINS[ws.words[i]], HIGH);
+    int word = ws.words[i];
+    if (word >= 0 && word < NUM_WORDS) {
+      digitalWrite(WORD_PINS[word], HIGH);
+    }
   }
 }
 
 void displayWordOn(int word) {
   if (word >= 0 && word < NUM_WORDS) {
     digitalWrite(WORD_PINS[word], HIGH);
-  }
-}
-
-void displayWordOff(int word) {
-  if (word >= 0 && word < NUM_WORDS) {
-    digitalWrite(WORD_PINS[word], LOW);
   }
 }

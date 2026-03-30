@@ -1,6 +1,10 @@
 // test-sketches/button-test/button-test.ino
 // Tests button wiring. Press each button and watch Serial Monitor.
 // Buttons use internal pullup — wire between pin and GND.
+//
+// Button pins are duplicated here because Arduino IDE copies sketches
+// to a temp directory before compiling, breaking relative #include paths.
+// If you change button pins in config.h, update this file too.
 
 const int PIN_BTN_HOUR = 38;
 const int PIN_BTN_MIN = 39;
@@ -10,8 +14,10 @@ void setup() {
   pinMode(PIN_BTN_HOUR, INPUT_PULLUP);
   pinMode(PIN_BTN_MIN, INPUT_PULLUP);
   Serial.println("Button Test — press buttons and watch output");
-  Serial.println("Hour button: pin 38");
-  Serial.println("Minute button: pin 39");
+  Serial.print("Hour button: pin ");
+  Serial.println(PIN_BTN_HOUR);
+  Serial.print("Minute button: pin ");
+  Serial.println(PIN_BTN_MIN);
 }
 
 void loop() {

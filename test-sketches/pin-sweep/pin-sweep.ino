@@ -3,8 +3,11 @@
 // Open Serial Monitor at 9600 baud to see which pin/word is active.
 // Watch the clock face and note which word lights up for each pin.
 // Use this to verify/correct the pin mapping in config.h.
+//
+// WORD_PINS is duplicated here because Arduino IDE copies sketches to a
+// temp directory before compiling, breaking relative #include paths.
+// If you change pin assignments in config.cpp, update this file too.
 
-// Copy these from config.h so this sketch is self-contained:
 const char* WORD_NAMES[] = {
   "IT_IS", "TEN_MIN", "HALF", "QUARTER", "TWENTY", "FIVE_MIN",
   "MINUTES", "PAST", "TO", "ONE", "TWO", "THREE", "FOUR",
