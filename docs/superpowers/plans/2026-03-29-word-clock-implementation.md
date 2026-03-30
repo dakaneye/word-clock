@@ -91,52 +91,42 @@ enum Word {
 // Arduino Mega pin for each word — index by Word enum
 // Grouped by physical MOSFET module position on back of board
 const int WORD_PINS[NUM_WORDS] = {
-  // Module 1: Top (rows 1-2)
-  2,   // W_IT_IS
-  3,   // W_TEN_MIN
-  4,   // W_HALF
-  5,   // W_QUARTER
+  // Pins match spec: grouped by physical MOSFET module on back of board.
+  // Enum order != module order. That's fine — this array maps enum → pin.
 
-  // Module 2: Upper (rows 2-4)
-  6,   // W_TWENTY
-  7,   // W_FIVE_MIN
-  8,   // W_MINUTES
-  9,   // W_PAST
-
-  // Module 3: Mid-upper (rows 4-5)
-  10,  // W_TO
-  22,  // W_ONE
-  23,  // W_TWO
-  24,  // W_THREE
-
-  // Module 4: Middle (rows 5-6)
-  25,  // W_FOUR
-  26,  // W_FIVE_HR
-  27,  // W_SIX
-  28,  // W_SEVEN
-
-  // Module 5: Mid-lower (rows 7-8)
-  29,  // W_EIGHT
-  30,  // W_NINE
-  31,  // W_TEN_HR
-  32,  // W_ELEVEN
-
-  // Module 6: Lower (rows 8-9)
-  33,  // W_TWELVE
-  34,  // W_OCLOCK
-  35,  // W_AM
-  36,  // W_PM
-
-  // Module 7: Birthday (rows 4-9)
-  37,  // W_HAPPY
-  38,  // W_BIRTH
-  39,  // W_CHELSEA
-  40,  // W_DAY
+  2,   // W_IT_IS      — Module 1, CH1
+  3,   // W_TEN_MIN    — Module 1, CH2
+  4,   // W_HALF       — Module 1, CH3
+  5,   // W_QUARTER    — Module 1, CH4
+  6,   // W_TWENTY     — Module 2, CH1
+  7,   // W_FIVE_MIN   — Module 2, CH2
+  8,   // W_MINUTES    — Module 2, CH3
+  9,   // W_PAST       — Module 2, CH4
+  10,  // W_TO         — Module 3, CH1
+  22,  // W_ONE        — Module 4, CH1
+  26,  // W_TWO        — Module 5, CH1
+  13,  // W_THREE      — Module 3, CH4
+  24,  // W_FOUR       — Module 4, CH3
+  33,  // W_FIVE_HR    — Module 6, CH4
+  30,  // W_SIX        — Module 6, CH1
+  28,  // W_SEVEN      — Module 5, CH3
+  27,  // W_EIGHT      — Module 5, CH2
+  29,  // W_NINE       — Module 5, CH4
+  34,  // W_TEN_HR     — Module 7, CH1
+  23,  // W_ELEVEN     — Module 4, CH2
+  31,  // W_TWELVE     — Module 6, CH2
+  35,  // W_OCLOCK     — Module 7, CH2
+  36,  // W_AM         — Module 7, CH3
+  37,  // W_PM         — Module 7, CH4
+  11,  // W_HAPPY      — Module 3, CH2
+  12,  // W_BIRTH      — Module 3, CH3
+  32,  // W_CHELSEA    — Module 6, CH3
+  25,  // W_DAY        — Module 4, CH4
 };
 
 // Button pins
-const int PIN_BTN_HOUR = 41;
-const int PIN_BTN_MIN = 42;
+const int PIN_BTN_HOUR = 38;
+const int PIN_BTN_MIN = 39;
 
 // DS3231 RTC uses I2C: SDA=20, SCL=21 (hardwired on Mega)
 
@@ -1145,8 +1135,10 @@ const char* WORD_NAMES[] = {
 };
 
 const int WORD_PINS[] = {
-  2, 3, 4, 5, 6, 7, 8, 9, 10,
-  22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40
+  2, 3, 4, 5, 6, 7, 8, 9, 10,     // IT_IS..TO
+  22, 26, 13, 24, 33, 30, 28, 27,  // ONE..EIGHT
+  29, 34, 23, 31, 35, 36, 37,      // NINE..PM
+  11, 12, 32, 25                    // HAPPY..DAY
 };
 
 const int NUM_WORDS = 28;
@@ -1199,8 +1191,10 @@ const char* WORD_NAMES[] = {
 };
 
 const int WORD_PINS[] = {
-  2, 3, 4, 5, 6, 7, 8, 9, 10,
-  22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40
+  2, 3, 4, 5, 6, 7, 8, 9, 10,     // IT_IS..TO
+  22, 26, 13, 24, 33, 30, 28, 27,  // ONE..EIGHT
+  29, 34, 23, 31, 35, 36, 37,      // NINE..PM
+  11, 12, 32, 25                    // HAPPY..DAY
 };
 
 const int NUM_WORDS = 28;
@@ -1270,16 +1264,16 @@ void loop() {
 // Tests button wiring. Press each button and watch Serial Monitor.
 // Buttons use internal pullup — wire between pin and GND.
 
-const int PIN_BTN_HOUR = 41;
-const int PIN_BTN_MIN = 42;
+const int PIN_BTN_HOUR = 38;
+const int PIN_BTN_MIN = 39;
 
 void setup() {
   Serial.begin(9600);
   pinMode(PIN_BTN_HOUR, INPUT_PULLUP);
   pinMode(PIN_BTN_MIN, INPUT_PULLUP);
   Serial.println("Button Test — press buttons and watch output");
-  Serial.println("Hour button: pin 41");
-  Serial.println("Minute button: pin 42");
+  Serial.println("Hour button: pin 38");
+  Serial.println("Minute button: pin 39");
 }
 
 void loop() {
