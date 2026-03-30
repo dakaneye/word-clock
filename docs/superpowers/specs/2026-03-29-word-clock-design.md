@@ -2,7 +2,7 @@
 
 ## Overview
 
-Revive a 2015 word clock project for Chelsea (wife, birthday May 4th). The clock displays time in English words on a laser-cut birch panel using white LEDs. A birthday mode activates on May 4th displaying "HAPPY BIRTHDAY CHELSEA DAY".
+Revive a 2015 word clock project for Chelsea (wife, birthday May 4th). The clock displays time in English words on a laser-cut birch panel using white LEDs. A birthday mode activates on May 4th displaying "HAPPY BIRTH DAY CHELSEA".
 
 ## Hardware
 
@@ -28,7 +28,7 @@ Revive a 2015 word clock project for Chelsea (wife, birthday May 4th). The clock
 - Zero IC soldering — MOSFET modules are pre-assembled with screw terminals
 - One Arduino pin per word — simple `digitalWrite()`, no bit-shifting logic
 - Easier to debug — toggle one pin, one word lights up
-- Mega has 54 digital pins, we need 28 + 2 buttons + 2 I2C = 32
+- Mega has 54 digital pins, we need 27 + 2 buttons + 2 I2C = 31
 
 ## Word Grid Layout
 
@@ -38,7 +38,7 @@ Row 1:  I T R I S C T E N H A L F
 Row 2:  Q U A R T E R T W E N T Y
 Row 3:  F I V E C M I N U T E S H
 Row 4:  N H A P P Y P A S T T O D
-Row 5:  O N E B I R T H * * * E E  (* = verify: THREE or DAY+EE)
+Row 5:  O N E B I R T H T H R E E
 Row 6:  E L E V E N F O U R D A Y
 Row 7:  T W O E I G H T S E V E N
 Row 8:    N I N E S I X T W E L V E
@@ -46,9 +46,9 @@ Row 9:  C H E L S E A R W F I V E
 Row 10: T E N O C L O C K A M P M
 ```
 
-## 28 Word Groups
+## 27 Word Groups
 
-### Time display words (24)
+### Time display words (23)
 | # | Word | Row | Purpose |
 |---|------|-----|---------|
 | 1 | IT IS | 1 | Always on |
@@ -62,7 +62,7 @@ Row 10: T E N O C L O C K A M P M
 | 9 | TO | 4 | :35–:55 |
 | 10 | ONE | 5 | Hour 1 |
 | 11 | TWO | 7 | Hour 2 |
-| 12 | THREE | 5 (right side: T-H-R-E-E) | Hour 3 |
+| 12 | THREE | 5 (letters 9-13) | Hour 3 |
 | 13 | FOUR | 6 | Hour 4 |
 | 14 | FIVE (hr) | 9 | Hour 5 |
 | 15 | SIX | 8 | Hour 6 |
@@ -74,15 +74,20 @@ Row 10: T E N O C L O C K A M P M
 | 21 | TWELVE | 8 | Hour 12 |
 | 22 | O'CLOCK | 10 | :00 |
 | 23 | AM | 10 | Morning indicator |
+
+### Shared time + birthday words (1)
+| # | Word | Row | Purpose |
+|---|------|-----|---------|
 | 24 | PM | 10 | Afternoon indicator |
 
-### Birthday words (4)
+### Birthday words (3)
 | # | Word | Row | Purpose |
 |---|------|-----|---------|
 | 25 | HAPPY | 4 | Birthday mode |
-| 26 | BIRTHDAY | 5 | Birthday mode |
+| 26 | BIRTH | 5 (letters 5-9) | Birthday mode |
 | 27 | CHELSEA | 9 | Birthday mode |
-| 28 | DAY | 6 | Birthday mode |
+
+Note: "BIRTH" and "THREE" share row 5. "DAY" at end of row 6 shares LEDs with "FOUR" + "DAY" — need to verify during pin sweep whether DAY has its own cathode group or is part of another word. Birthday message displays as "HAPPY BIRTH DAY CHELSEA" where DAY uses the row 6 DAY group.
 
 ## Pin Assignments
 
@@ -92,8 +97,8 @@ Row 10: T E N O C L O C K A M P M
 |--------|------|-----------|-----------|-----------|-----------|
 | 1 | Top (rows 1-2) | IT IS (2) | TEN min (3) | HALF (4) | QUARTER (5) |
 | 2 | Upper (rows 2-4) | TWENTY (6) | FIVE min (7) | MINUTES (8) | PAST (9) |
-| 3 | Mid-upper (rows 4-5) | TO (10) | HAPPY (11) | BIRTHDAY (12) | DAY (13) |
-| 4 | Middle (rows 5-6) | ONE (22) | ELEVEN (23) | FOUR (24) | THREE (25) |
+| 3 | Mid-upper (rows 4-5) | TO (10) | HAPPY (11) | BIRTH (12) | THREE (13) |
+| 4 | Middle (rows 5-6) | ONE (22) | ELEVEN (23) | FOUR (24) | DAY (25) |
 | 5 | Mid-lower (rows 7-8) | TWO (26) | EIGHT (27) | SEVEN (28) | NINE (29) |
 | 6 | Lower (rows 8-9) | SIX (30) | TWELVE (31) | CHELSEA (32) | FIVE hr (33) |
 | 7 | Bottom (row 10) | TEN hr (34) | O'CLOCK (35) | AM (36) | PM (37) |
@@ -131,7 +136,7 @@ Hour displayed in 12-hour format. For :35-:59, the next hour is shown (e.g., at 
 ## Birthday Mode
 
 - Activates on May 4th (Chelsea's birthday)
-- Alternates between time display and "HAPPY BIRTHDAY CHELSEA DAY"
+- Alternates between time display and "HAPPY BIRTH DAY CHELSEA"
 - Cycle: show time for 5 seconds, show birthday message for 5 seconds
 - Active all day (midnight to midnight May 4th)
 
