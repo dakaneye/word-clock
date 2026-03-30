@@ -13,7 +13,7 @@ WordSet birthdayWords(bool isPM) {
   ws.words[ws.count++] = W_HAPPY;
   ws.words[ws.count++] = W_BIRTH;
   ws.words[ws.count++] = W_DAY;
-  ws.words[ws.count++] = W_CHELSEA;
+  ws.words[ws.count++] = W_NAME;
   ws.words[ws.count++] = isPM ? W_PM : W_AM;
   return ws;
 }

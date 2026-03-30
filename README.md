@@ -7,6 +7,10 @@ An Arduino-powered word clock that displays time in English words on a laser-cut
 
 Includes a birthday mode that alternates "HAPPY BIRTH DAY CHELSEA" with the time display on May 4th.
 
+Inspired by [this reddit post](https://www.reddit.com/r/DIY/comments/2ao9yt/i_built_this_word_clock_for_my_brother_and_his/) and [build gallery](https://imgur.com/a/iMXmj). The original project started in 2015 and was revived in 2026 with a simpler hardware design (MOSFET modules instead of shift registers).
+
+**Want to build your own?** See the [Customization Guide](docs/customization.md) — swap in any name, birthday, or word layout.
+
 ## Word Grid
 
 ```
@@ -67,5 +71,6 @@ cd test && make test
 
 ## Docs
 
-- [Design Spec](docs/superpowers/specs/2026-03-29-word-clock-design.md)
-- [Assembly Guide](docs/assembly-guide.md)
+- [Customization Guide](docs/customization.md) — change the name, birthday, word layout, or hardware
+- [Assembly Guide](docs/assembly-guide.md) — step-by-step wiring and testing
+- [Design Spec](docs/superpowers/specs/2026-03-29-word-clock-design.md) — architecture decisions
