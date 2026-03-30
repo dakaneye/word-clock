@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  native-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Run native time_to_words tests
+        run: |
+          cd test
+          make test
+
+  arduino-compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Install Arduino CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$PWD/bin" >> $GITHUB_PATH
+
+      - name: Install Arduino core and libraries
+        run: |
+          arduino-cli core install arduino:avr
+          arduino-cli lib install "RTClib"
+
+      - name: Compile main sketch
+        run: arduino-cli compile --fqbn arduino:avr:mega word-clock
+
+      - name: Compile test sketches
+        run: |
+          arduino-cli compile --fqbn arduino:avr:mega test-sketches/rtc-test
+          arduino-cli compile --fqbn arduino:avr:mega test-sketches/pin-sweep
+          arduino-cli compile --fqbn arduino:avr:mega test-sketches/word-test
+          arduino-cli compile --fqbn arduino:avr:mega test-sketches/button-test
