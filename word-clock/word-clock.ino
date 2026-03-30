@@ -1,16 +1,65 @@
-// Word Clock - Blink test
-// Verifies Arduino is working and uploads succeed.
-// The onboard LED (pin 13) blinks once per second.
+// word-clock/word-clock.ino
+#include "config.h"
+#include "time_to_words.h"
+#include "display.h"
+#include "clock.h"
+#include "buttons.h"
+#include "birthday.h"
 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
-  Serial.println("Word Clock - blink test OK");
+  Serial.println("Word Clock starting...");
+
+  displayInit();
+  buttonsInit();
+
+  if (!clockInit()) {
+    Serial.println("ERROR: DS3231 RTC not found!");
+    // Flash all words as error indicator
+    for (int i = 0; i < NUM_WORDS; i++) {
+      displayWordOn(i);
+    }
+    delay(1000);
+    displayClear();
+    delay(1000);
+  }
+
+  Serial.println("Word Clock ready.");
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
+  // Handle button presses
+  if (buttonsHourPressed()) {
+    clockAdvanceHour();
+    Serial.println("Hour advanced");
+  }
+  if (buttonsMinutePressed()) {
+    clockAdvanceMinute5();
+    Serial.println("Minute advanced by 5");
+  }
+
+  // Read current time
+  ClockTime ct = clockRead();
+
+  // Convert time to words
+  WordSet ws = timeToWords(ct.hour, ct.minute, ct.isPM);
+
+  // Apply birthday mode if applicable
+  ws = birthdayDisplay(ws, ct);
+
+  // Update display
+  displayShow(ws);
+
+  // Print time to serial for debugging
+  static int lastMinute = -1;
+  if (ct.minute != lastMinute) {
+    lastMinute = ct.minute;
+    Serial.print(ct.hour);
+    Serial.print(":");
+    if (ct.minute < 10) Serial.print("0");
+    Serial.print(ct.minute);
+    Serial.println(ct.isPM ? " PM" : " AM");
+  }
+
+  delay(100);  // 10Hz update rate
 }
