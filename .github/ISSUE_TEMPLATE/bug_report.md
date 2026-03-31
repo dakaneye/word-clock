@@ -1,26 +1,28 @@
 ---
-name: Bug Report
-about: Report a problem with the word clock
+name: Bug report
+about: Report something that isn't working
 title: ''
 labels: bug
 assignees: ''
 ---
 
 **Describe the bug**
-What's happening?
+A clear description of what's wrong.
+
+**To reproduce**
+Steps to reproduce the behavior.
 
 **Expected behavior**
-What should happen instead?
+What you expected to happen.
 
-**Hardware setup**
-- Arduino board: [e.g., Mega 2560]
-- RTC module: [e.g., DS3231]
-- Power supply: [e.g., 5V 4A]
+**Environment**
+- OS: [e.g. macOS 14.0]
+- Version: [e.g. 0.1.0]
 
-**Steps to reproduce**
-1.
-2.
-3.
+**Logs**
+```
+Paste relevant logs here
+```
 
-**Serial monitor output**
-If applicable, paste the serial output here.
+**Additional context**
+Any other relevant information.
