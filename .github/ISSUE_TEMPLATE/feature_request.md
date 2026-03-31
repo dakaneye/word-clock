@@ -1,16 +1,19 @@
 ---
-name: Feature Request
-about: Suggest an idea for the word clock
+name: Feature request
+about: Suggest an idea for this project
 title: ''
 labels: enhancement
 assignees: ''
 ---
 
-**What would you like?**
-Describe the feature.
+**Is your feature request related to a problem?**
+A clear description of the problem.
 
-**Why?**
-What problem does this solve?
+**Describe the solution you'd like**
+A clear description of what you want to happen.
 
 **Alternatives considered**
-Any other approaches you've thought about?
+Any alternative solutions or features you've considered.
+
+**Additional context**
+Any other context about the feature request.
