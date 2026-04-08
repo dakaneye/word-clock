@@ -9,8 +9,8 @@
 // Returns true if today is the birthday
 bool isBirthday(const ClockTime& ct);
 
-// Returns the birthday WordSet (IT IS HAPPY BIRTH DAY CHELSEA + AM/PM)
-WordSet birthdayWords(bool isPM);
+// Returns the birthday WordSet (HAPPY BIRTH DAY CHELSEA)
+WordSet birthdayWords();
 
 // Given the time-based WordSet and clock, returns what to actually display.
 // On birthday: alternates between time and birthday message every BIRTHDAY_CYCLE_MS.
