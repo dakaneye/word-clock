@@ -12,7 +12,8 @@
 - Arduino Mega (new, in box)
 - DS3231 RTC module (existing, tested working)
 - 7x NOYITO 4-Channel MOSFET modules (new, in box)
-- 5V 4A power supply (existing)
+- 5V 4A power supply with barrel connector (existing)
+- DC barrel jack breakout adapter (to expose +5V and GND wires from the power supply's barrel plug)
 - Jumper wires, hookup wire, wire strippers (new)
 - Inline fuse holder + 3A fast-blow fuse (for the 5V power line)
 - 1000uF electrolytic capacitor (for the power supply — absorbs voltage spikes on startup)
@@ -321,9 +322,12 @@ Each button needs 2 connections: one wire to an Arduino pin, one wire to GND. Th
 
 The LEDs need external 5V from the power supply, not from the Arduino.
 
-1. Connect an **inline fuse holder with a 3A fast-blow fuse** to the power supply's +5V wire. Connect the other end of the fuse holder to the common anode bus on the LED board. This protects against short circuits — without it, the 4A supply can overheat wires if something shorts.
-2. Connect the power supply's GND wire to the common GND point (the terminal block or breadboard where the Arduino GND and all module GNDs meet). All grounds in the system must be connected together.
-3. The Arduino is powered separately via USB during testing. For permanent use, plug a USB power adapter into the Arduino's USB port. Do **not** feed 5V into the barrel jack — the barrel jack expects 7-12V and the onboard regulator will not work properly at 5V.
+**Your power supply has a barrel connector.** It looks like it should plug into the Arduino's barrel jack, but **do not do this** — the Arduino barrel jack expects 7-12V input for its onboard voltage regulator. Feeding 5V into it will not power the Arduino reliably. Instead, use a **DC barrel jack breakout adapter** — a small board that accepts the barrel plug and exposes screw terminals or bare +5V and GND wires.
+
+1. Plug the power supply's barrel connector into the breakout adapter.
+2. Connect an **inline fuse holder with a 3A fast-blow fuse** to the breakout adapter's +5V terminal. Connect the other end of the fuse holder to the common anode bus on the LED board. This protects against short circuits — without it, the 4A supply can overheat wires if something shorts.
+3. Connect the breakout adapter's GND terminal to the common GND point (the terminal block or breadboard where the Arduino GND and all module GNDs meet). All grounds in the system must be connected together.
+4. The Arduino is powered separately via USB during testing. For permanent use, plug a USB power adapter into the Arduino's USB port.
 
 **Put the 1000uF electrolytic capacitor across +5V and GND** where the power supply enters the board (on the bus-wire side of the fuse). Electrolytic capacitors are polarized — the longer leg is positive and goes to +5V, the shorter leg (also marked with a minus-sign stripe on the housing) goes to GND. **Getting this backwards WILL damage the capacitor — it may pop loudly, leak, or vent hot caustic electrolyte. Double-check polarity before connecting power.**
 
@@ -378,7 +382,7 @@ The clock should display the current time in words. Use buttons to set the corre
 Once everything works:
 
 1. Mount the Arduino Mega securely inside the frame (screws, standoffs, or double-sided tape)
-2. For permanent power, plug a USB power adapter into the Arduino's USB port. The 5V LED power supply and USB adapter can share a wall outlet or power strip.
+2. For permanent power, plug a USB power adapter into the Arduino's USB port. The 5V LED power supply (via barrel breakout) and the USB adapter can share a wall outlet or power strip.
 3. Route the power cable(s) through the hole in the frame
 4. Slide the back panel into the frame grooves
 5. Hang it up or set it on a shelf
