@@ -24,7 +24,6 @@
 - Wire strippers
 - Small phillips screwdriver (for MOSFET module screw terminals)
 - Masking tape + sharpie (for labeling)
-- CR2032 coin cell battery (for testing LED groups — you probably have one in the RTC module's packaging or a spare)
 - Multimeter (optional but helpful for checking continuity and debugging)
 
 ## How This Thing Works (quick primer)
@@ -77,16 +76,27 @@ On the back, you'll see:
 - **Clusters of LED legs** poking through the board, grouped by word. Each cluster's cathode (-) legs are either already soldered together, have a wire attached, or are bare leads.
 - **Some existing wires** (AM/PM, birthday words, buttons) — these are already labeled or identifiable.
 
-### Step 2: Map each cluster to a word using a coin cell
+### Step 2: Map each cluster to a word using the 5V supply
 
-This is the reliable way to identify groups when you can't tell by visual inspection alone.
+The CR2032 coin cell method doesn't reliably light white LEDs — 3V nominal drops under load, and with the series resistors on the board there's not enough headroom. Use the actual 5V power supply with a jumper wire as a probe instead.
 
-1. Hold a **CR2032 coin cell battery** with the **positive side** (the wider face with the "+" marking and model number printed on it) touching the bus wire or any anode lead
-2. Touch the **negative side** (the plain, smaller face on the bottom) to a bare cathode lead or wire from a cluster
-3. The LEDs in that cluster should glow dimly — look at the front panel to see which word lit up
-4. Stick a piece of masking tape near that cluster and write the word name on it
+**One-time setup (safe because nothing else is wired yet):**
+1. Plug the power supply's barrel connector into the breakout adapter
+2. Wire the breakout's +5V terminal through the inline fuse (3A fast-blow) to the common anode bus on the LED board
+3. Leave the breakout's GND terminal free for now — you'll use a jumper wire clipped to it as your probe
 
-**If a group doesn't light with the coin cell,** try in a darkened room. White LEDs need ~3V to turn on and the coin cell is marginal after accounting for the resistor drop. If you still see nothing, mark the group as "unknown" and verify it later in Phase 9 with the full 5V supply. A non-glowing group at this stage does not necessarily mean dead LEDs.
+**To identify each cluster:**
+1. Clip one end of a jumper wire to the breakout's GND terminal
+2. Turn on the power supply
+3. Briefly touch the other end of the jumper to a bare cathode lead or cathode wire from a cluster — the LEDs in that cluster should light up brightly
+4. Look at the front panel to see which word lit up
+5. Stick a piece of masking tape near that cluster and write the word name on it
+6. Turn off the power supply when you're done probing a cluster
+
+**Safety notes:**
+- The inline fuse protects against accidental shorts, but still work deliberately — don't touch the probe to anything except cathode leads
+- Only touch one cluster at a time
+- If a group doesn't light: check that the jumper is making solid contact with the cathode lead. If it still won't light, mark it as "unknown" — it may be a broken solder joint or dead LED, and you can diagnose it later once the MOSFETs are wired
 
 Work row by row across the front panel. The 28 groups are:
 
