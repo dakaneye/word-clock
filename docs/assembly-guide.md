@@ -54,7 +54,7 @@ Follow these throughout the entire build:
 
 1. **Always disconnect the power supply AND USB cable before making or changing any wire connections.** Reconnect only for testing. The 5V 4A supply can push enough current through a short circuit to overheat wires or damage components.
 2. **Touch a grounded metal surface** before handling the Arduino or RTC module to discharge static, especially in dry weather.
-3. **Never feed LED power through the Arduino.** The Arduino's 5V pin is for logic power to the MOSFET modules only (~100mA total). The LEDs get their power directly from the external 5V supply through the bus wire.
+3. **Never route LED current through the Arduino.** The LEDs draw amps — that current flows from the power supply through the bus wire, through the LEDs, and back to the supply through the MOSFET modules. The Arduino's 5V pin powers the Arduino and MOSFET logic only (~100mA total).
 
 ## Before You Start
 
@@ -327,7 +327,8 @@ The LEDs need external 5V from the power supply, not from the Arduino.
 1. Plug the power supply's barrel connector into the breakout adapter.
 2. Connect an **inline fuse holder with a 3A fast-blow fuse** to the breakout adapter's +5V terminal. Connect the other end of the fuse holder to the common anode bus on the LED board. This protects against short circuits — without it, the 4A supply can overheat wires if something shorts.
 3. Connect the breakout adapter's GND terminal to the common GND point (the terminal block or breadboard where the Arduino GND and all module GNDs meet). All grounds in the system must be connected together.
-4. The Arduino is powered separately via USB during testing. For permanent use, plug a USB power adapter into the Arduino's USB port.
+4. Run a wire from the breakout adapter's +5V terminal (before the fuse) to the Arduino Mega's **5V pin**. This powers the Arduino from the same supply — the 5V pin connects directly to the board's 5V rail, bypassing the barrel jack's voltage regulator. Do **not** use the barrel jack — it expects 7-12V input and will not deliver reliable voltage from a 5V supply.
+5. During testing, you can power the Arduino via USB instead (just unplug the 5V pin wire). USB and the 5V pin should not supply power simultaneously — use one or the other.
 
 **Put the 1000uF electrolytic capacitor across +5V and GND** where the power supply enters the board (on the bus-wire side of the fuse). Electrolytic capacitors are polarized — the longer leg is positive and goes to +5V, the shorter leg (also marked with a minus-sign stripe on the housing) goes to GND. **Getting this backwards WILL damage the capacitor — it may pop loudly, leak, or vent hot caustic electrolyte. Double-check polarity before connecting power.**
 
@@ -382,8 +383,8 @@ The clock should display the current time in words. Use buttons to set the corre
 Once everything works:
 
 1. Mount the Arduino Mega securely inside the frame (screws, standoffs, or double-sided tape)
-2. For permanent power, plug a USB power adapter into the Arduino's USB port. The 5V LED power supply (via barrel breakout) and the USB adapter can share a wall outlet or power strip.
-3. Route the power cable(s) through the hole in the frame
+2. Disconnect USB. The 5V power supply powers both the LEDs and the Arduino (via the 5V pin) — one cord runs everything.
+3. Route the power cable through the hole in the frame
 4. Slide the back panel into the frame grooves
 5. Hang it up or set it on a shelf
 
