@@ -44,3 +44,25 @@ All user-customizable values are in the top section of `config.h`: name word (`W
 Tests in `test/test_time_to_words.cpp` use a minimal hand-rolled framework (no test library). They `#include` the `.cpp` files directly with Arduino stubs to compile natively. Tests verify every 5-minute block, hour transitions, AM/PM, and edge cases.
 
 `test-sketches/` are standalone Arduino sketches for hardware validation — not automated tests.
+
+## Build Journal
+
+This project maintains a build journal at `docs/build-journal.md` as raw material for a future blog post. It captures planning sessions, hardware debugging moments, surprises, wrong turns, decisions, and meta-observations — the narrative detail that gets lost in code and commit messages but makes for interesting writing.
+
+**Append to it periodically when something journal-worthy happens:**
+- A planning decision with meaningful tradeoffs or reasoning worth recording
+- Hardware debugging that reveals a surprise ("whoa" moments, wrong assumptions, new techniques)
+- A wrong turn or mistake that taught something
+- Hitting a milestone worth marking
+- A meta-observation about the process, tooling, or collaboration pattern
+
+**Don't journal every tool use or routine commit.** Use judgment. The goal is the kind of signal that would make a reader lean in.
+
+**Format:**
+- Dated sessions as `## YYYY-MM-DD — <session theme>`
+- Free-form headings beneath (`### What the photos taught us`, `### Surprise #N`, etc.)
+- Honest tone — include the confusion and the wrong turns, not just the successful path
+- First-person "the user" / "I" is fine; the blog author will rewrite
+- Keep a "Running follow-up list" at the bottom for things noted but not yet resolved
+
+**Commit strategy:** commit journal updates as their own commits so the progression is preserved. Don't bundle journal edits with unrelated code changes.
