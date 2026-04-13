@@ -175,12 +175,113 @@ Active hypotheses to test next:
 
 ---
 
+## 2026-04-13 — The breakthrough: common cathode, not common anode
+
+### Hours of wrong-tree debugging
+
+We spent the entire April 9 session and part of today chasing phantom problems: alligator clip contact, barrel jack adapter continuity, wire breaks, bus wire identification. Every individual component tested fine. Voltage was present. But no LED would light.
+
+The finger trick on TEN was the most misleading clue. It worked once, couldn't be reproduced reliably, and sent us down a path of debugging clip-to-cathode contact quality. In hindsight, it was probably a fluke — static discharge, or incidental body contact completing a circuit through an accidental path. We built an entire diagnostic theory on a single unreproducible observation.
+
+### The actual root cause
+
+The assembly guide said "common anode." The board is actually **common cathode.**
+
+- The thick serpentine bus wire connects all LED **cathodes** (GND side), not anodes
+- The individual word wires connect to each word's LED **anodes** (+V side)
+- To light a word: +5V on the word wire, GND on the bus
+- We had been doing the opposite: +5V on the bus, GND on the word wire = every LED reverse-biased = nothing lights
+
+The discovery came from going back to absolute basics. Instead of probing through the board's wiring, we tested a single LED directly on its two legs with the Arduino's 5V and GND pins. It lit up — proving the LEDs were alive. And the leg that received +5V connected to what we'd been calling the "cathode wire," not the "anode bus."
+
+Every LED on the board is fine. Every wire is fine. The clips were fine. The barrel jack adapter was probably fine. We were just pushing current backwards through every LED for two sessions.
+
+### The cascade of simplification
+
+Once we knew it was common cathode, the user asked the right question: "Can you take a step back and think about what the simplest possible path to completion is?"
+
+The answer turned out to eliminate most of the hardware:
+
+**Original plan (common anode + MOSFET modules):**
+- 7 NOYITO 4-channel MOSFET modules mounted on a plastic insert
+- 28 cathode wires from LED board to MOSFET screw terminals
+- 28 signal jumpers from MOSFETs to Arduino
+- VCC + GND daisy chain across all 7 modules
+- Common ground bus (18 AWG copper wire)
+- External 5V power supply + barrel jack adapter + inline fuse + capacitor
+- M3 screws, zip ties, wire highway, color-coded bundles
+
+**Actual solution (common cathode + direct pin drive):**
+- Wire each word's anode directly to an Arduino Mega digital pin
+- Wire the bus to Arduino GND
+- Power via USB
+- That's it
+
+The MOSFET modules are unnecessary — the Arduino's pins can source enough current to drive the LEDs directly. The external power supply is unnecessary — USB provides plenty for ~200mA peak draw. The barrel jack adapter, fuse, capacitor, ground bus, plastic insert mounting hardware — all unnecessary.
+
+The firmware didn't even need changes. `digitalWrite(pin, HIGH)` sources +5V from the pin to the word's anode, current flows through the LEDs to the bus (GND), LED lights up. Same logic as the MOSFET design, just without the MOSFET in the middle.
+
+### The N-channel MOSFET incompatibility
+
+Even if we'd wanted to use the NOYITO modules, they wouldn't have worked for common cathode. N-channel MOSFET modules are low-side switches — they connect a load to GND when activated. Common cathode needs high-side switching — connecting a load to +5V. The modules the user bought were fundamentally incompatible with the board's wiring. They need to be returned.
+
+### It works
+
+From "common cathode discovery" to "working clock on the wall" took about an hour:
+1. Label each word by touching +5V to its anode wire (with GND on the bus) — confirmed all 28 word groups work
+2. Wire each word's anode to its assigned Arduino pin per `config.cpp`
+3. Wire the bus to Arduino GND
+4. Wire the DS3231 RTC (4 wires)
+5. Skip the buttons for now (5 wires per button, unknown pinout, not needed for basic operation)
+6. Upload the firmware via `arduino-cli`
+7. Upload a quick time-setting sketch to set the RTC to the correct time
+8. Re-upload the clock firmware
+9. "IT IS HALF PAST TWO PM" — first correct time display
+
+The clock updates every 5 minutes. Birthday mode (May 4th) is untested but the birthday LEDs are multicolored (rainbow), which is a nice surprise nobody mentioned in the original design.
+
+### Parts that turned out to be unnecessary
+
+- 7x NOYITO 4-channel MOSFET modules → return
+- 6V power supply → wrong voltage, also unnecessary
+- 5V power supply → unnecessary (USB powers everything)
+- DC barrel jack breakout adapter → unnecessary
+- Inline fuse holder + 3A fuse → unnecessary
+- 1000µF capacitor → unnecessary
+- M3 screws + nuts → unnecessary (no plastic insert mounting)
+- 18 AWG copper wire for GND bus → unnecessary
+- Heat shrink tubing → unnecessary
+
+### What's left
+
+- Solder the temporary test wires into permanent connections
+- Cut wires to proper length for clean routing
+- Figure out the button wiring (5 wires per button — need to identify which two are the switch contacts)
+- Mount everything in the frame
+- Power from a USB wall charger for permanent use
+- Update all the documentation (assembly guide, README, CLAUDE.md, config comments — everything says "common anode" and "MOSFET modules")
+- Test birthday mode on May 4th (or by temporarily setting the RTC date)
+
+### Meta-observations
+
+- **"Common anode" was in the original project description and nobody questioned it.** The assembly guide, the CLAUDE.md, the README, the code comments — every document assumed common anode because that's what was stated at the start. The actual board was never verified. Lesson: **verify your assumptions about existing hardware before designing a system around them.**
+- **The simplest solution was invisible while we were deep in the MOSFET plan.** We spent days planning mounting techniques, wire color schemes, ground bus construction, and module orientation — all for hardware that turned out to be unnecessary. The direct-drive approach was always available but never considered because "you need MOSFETs to drive LEDs" was an unquestioned assumption.
+- **Sunk cost bias nearly cost more time.** After buying 7 MOSFET modules, the instinct was to find a way to USE them (P-channel replacements, board rewiring, pull-up resistor hacks). The user cut through this by asking "what's the simplest path to completion?" The answer was "don't use MOSFETs at all."
+- **A 10-year-old project carries 10-year-old assumptions.** The original 2015 build used shift registers, which might have had a different driver topology. When the project was revived in 2026, the wiring description was reconstructed from memory, and "common anode" was either misremembered or confused with the shift register design. Nobody went back to the board to check.
+- **The multimeter paid for itself.** Without it, we'd still be guessing about wire connectivity and LED polarity. The diode test on individual LED legs was the single action that broke the impasse — not the voltage readings, not the continuity tests on wires, but a direct probe of the component itself.
+
+---
+
 ## Running follow-up list
 
-Things to do once we're past the current debug:
-
-- Resolve the 6V power supply question (replace supply, add regulator, or separate Arduino power)
-- Add a note to the assembly guide about verifying supply voltage BEFORE wiring anything
-- Possibly: add a note recommending soldered wires over alligator clips for permanent testing
-- Possibly: add the "buy a multimeter" recommendation to the materials list
-- Optional: collapse `W_HAPPY`/`W_BIRTH`/`W_DAY`/`W_CHELSEA` into one `W_BIRTHDAY` enum + update `birthday.cpp`, the test sketches, and `customization.md` (cosmetic cleanup, not required for function)
+- Update `docs/assembly-guide.md` — rewrite for common cathode + direct pin drive + USB power
+- Update `CLAUDE.md` — project description says "MOSFET drivers"
+- Update `README.md` — hardware section lists MOSFET modules
+- Update `config.h` / `config.cpp` / `display.cpp` — comments reference common anode + MOSFET switching
+- Update `docs/customization.md` — hardware alternatives table references MOSFET approach
+- Update test sketches — labels reference MOSFET modules
+- Figure out button wiring (5 wires per button)
+- Collapse `W_HAPPY`/`W_BIRTH`/`W_DAY`/`W_CHELSEA` into `W_BIRTHDAY` (cosmetic, confirmed daisy-chained)
+- Test birthday mode (set RTC to May 4th)
+- Solder permanent wires, cut to length, mount in frame
+- Add "verify your board's polarity before designing the driver circuit" to the assembly guide
