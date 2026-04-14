@@ -9,7 +9,7 @@
 // Returns true if today is the birthday
 bool isBirthday(const ClockTime& ct);
 
-// Returns the birthday WordSet (HAPPY BIRTH DAY CHELSEA)
+// Returns the birthday WordSet (all birthday words as one group)
 WordSet birthdayWords();
 
 // Given the time-based WordSet and clock, returns what to actually display.

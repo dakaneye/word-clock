@@ -9,10 +9,7 @@ bool isBirthday(const ClockTime& ct) {
 WordSet birthdayWords() {
   WordSet ws;
   ws.count = 0;
-  ws.words[ws.count++] = W_HAPPY;
-  ws.words[ws.count++] = W_BIRTH;
-  ws.words[ws.count++] = W_DAY;
-  ws.words[ws.count++] = W_NAME;
+  ws.words[ws.count++] = W_BIRTHDAY;
   return ws;
 }
 

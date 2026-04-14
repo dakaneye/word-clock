@@ -1,4 +1,6 @@
 // word-clock/display.cpp
+// Drives LEDs directly from Arduino digital pins.
+// Board is common cathode: pin HIGH = word on, pin LOW = word off.
 #include "display.h"
 #include <Arduino.h>
 

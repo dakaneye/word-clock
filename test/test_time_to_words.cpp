@@ -21,7 +21,7 @@ const char* WORD_NAMES[NUM_WORDS] = {
   "MINUTES", "PAST", "TO", "ONE", "TWO", "THREE", "FOUR",
   "FIVE_HR", "SIX", "SEVEN", "EIGHT", "NINE", "TEN_HR",
   "ELEVEN", "TWELVE", "OCLOCK", "AM", "PM",
-  "HAPPY", "BIRTH", "CHELSEA", "DAY"
+  "BIRTHDAY"
 };
 
 bool wordSetContains(const WordSet& ws, int word) {
@@ -214,44 +214,22 @@ void testAmPmToggle() {
 }
 
 void testBirthdayWords() {
-  // Verify birthdayWords produces the right set
-  // (This tests the WordSet construction, not millis()-based alternation)
-  // We include the birthday header inline since it has Arduino deps
-  // Just test the word set manually here
+  // Birthday words are a single consolidated group (W_BIRTHDAY)
+  // physically wired as one daisy-chained anode
   WordSet ws;
   ws.count = 0;
-  ws.words[ws.count++] = W_IT_IS;
-  ws.words[ws.count++] = W_HAPPY;
-  ws.words[ws.count++] = W_BIRTH;
-  ws.words[ws.count++] = W_DAY;
-  ws.words[ws.count++] = W_CHELSEA;
-  ws.words[ws.count++] = W_AM;
+  ws.words[ws.count++] = W_BIRTHDAY;
 
   tests_run++;
-  bool pass = (ws.count == 6);
-  pass = pass && wordSetContains(ws, W_IT_IS);
-  pass = pass && wordSetContains(ws, W_HAPPY);
-  pass = pass && wordSetContains(ws, W_BIRTH);
-  pass = pass && wordSetContains(ws, W_DAY);
-  pass = pass && wordSetContains(ws, W_CHELSEA);
-  pass = pass && wordSetContains(ws, W_AM);
+  bool pass = (ws.count == 1);
+  pass = pass && wordSetContains(ws, W_BIRTHDAY);
 
   if (pass) {
     tests_passed++;
   } else {
-    printf("FAIL: birthday words AM\n");
+    printf("FAIL: birthday words\n");
     printf("  Got: ");
     printWordSet(ws);
-  }
-
-  // PM version
-  ws.words[5] = W_PM;
-  tests_run++;
-  pass = wordSetContains(ws, W_PM) && !wordSetContains(ws, W_AM);
-  if (pass) {
-    tests_passed++;
-  } else {
-    printf("FAIL: birthday words PM\n");
   }
 }
 

@@ -3,9 +3,9 @@
 [![CI](https://github.com/dakaneye/word-clock/actions/workflows/ci.yml/badge.svg)](https://github.com/dakaneye/word-clock/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An Arduino-powered word clock that displays time in English words on a laser-cut birch panel. Built with an Arduino Mega 2560, DS3231 RTC, and MOSFET driver modules.
+An Arduino-powered word clock that displays time in English words on a laser-cut birch panel. Built with an Arduino Mega 2560 and a DS3231 RTC. The Arduino drives the LEDs directly from its digital pins — no MOSFET modules or shift registers needed.
 
-Includes a birthday mode that alternates "HAPPY BIRTH DAY CHELSEA" with the time display on May 4th.
+Includes a birthday mode that alternates "HAPPY BIRTH DAY CHELSEA" with the time display on May 4th. The birthday LEDs are multicolored (rainbow).
 
 Inspired by [this reddit post](https://www.reddit.com/r/DIY/comments/2ao9yt/i_built_this_word_clock_for_my_brother_and_his/) and [build gallery](https://imgur.com/a/iMXmj). The original project started in 2015 and was revived in 2026 with a simpler hardware design (MOSFET modules instead of shift registers).
 
@@ -28,12 +28,12 @@ T E N O C L O C K A M P M
 
 ## Hardware
 
-- Arduino Mega 2560
+- Arduino Mega 2560 (drives LEDs directly from digital pins)
 - DS3231 RTC module (I2C)
-- 7x 4-channel MOSFET driver modules (28 word groups)
-- ~100 white 5mm LEDs with 470 ohm resistors
+- ~100 white 5mm LEDs with 470 ohm resistors (common cathode wiring)
+- Rainbow LEDs for birthday words (HAPPY BIRTH DAY CHELSEA)
 - 2 push buttons (hour / minute setting)
-- 5V 4A power supply
+- 6V wall adapter (through Arduino barrel jack)
 - Laser-cut birch front panel, walnut frame
 
 ## Software Architecture

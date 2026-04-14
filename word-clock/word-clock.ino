@@ -14,8 +14,7 @@ void setup() {
   buttonsInit();
 
   if (!clockInit()) {
-    Serial.println("ERROR: DS3231 RTC not found! Check wiring: SDA=20, SCL=21");
-    // Halt with infinite blink — do not proceed with garbage time data
+    Serial.println("ERROR: Clock init failed");
     while (true) {
       for (int i = 0; i < NUM_WORDS; i++) displayWordOn(i);
       delay(500);
@@ -50,22 +49,15 @@ void loop() {
   // Update display
   displayShow(ws);
 
-  // Diagnostic: print time every second
-  static unsigned long lastDiagnostic = 0;
-  unsigned long now = millis();
-  if (now - lastDiagnostic >= 1000) {
-    lastDiagnostic = now;
-    Serial.print("ms=");
-    Serial.print(now);
-    Serial.print(" t=");
+  // Print time to serial for debugging
+  static int lastMinute = -1;
+  if (ct.minute != lastMinute) {
+    lastMinute = ct.minute;
     Serial.print(ct.hour);
     Serial.print(":");
     if (ct.minute < 10) Serial.print("0");
     Serial.print(ct.minute);
-    Serial.print(":");
-    if (ct.second < 10) Serial.print("0");
-    Serial.print(ct.second);
-    Serial.println(ct.isPM ? "PM" : "AM");
+    Serial.println(ct.isPM ? " PM" : " AM");
   }
 
   delay(100);  // 10Hz update rate

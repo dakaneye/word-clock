@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Arduino word clock — displays time as English words on a laser-cut panel. Arduino Mega 2560, DS3231 RTC, MOSFET drivers. Has a birthday mode (May 4th) that alternates "HAPPY BIRTH DAY CHELSEA" with the time.
+Arduino word clock — displays time as English words on a laser-cut panel. Arduino Mega 2560, DS3231 RTC. LEDs are wired common cathode and driven directly from Arduino digital pins (no MOSFET modules). Has a birthday mode (May 4th) that alternates "HAPPY BIRTH DAY CHELSEA" (rainbow LEDs) with the time.
 
 ## Build & Test
 
@@ -31,13 +31,15 @@ The core logic separation: `time_to_words` is a pure function (hour, minute, isP
 All other modules (`display`, `clock`, `buttons`, `birthday`) depend on Arduino libraries and are only verified via `arduino-cli compile` and hardware test-sketches.
 
 Key types:
-- `Word` enum in `config.h` — one value per word group on the physical panel (28 total)
+- `Word` enum in `config.h` — one value per word group on the physical panel (25 total: 24 time words + 1 birthday group)
 - `WordSet` in `time_to_words.h` — fixed-size array of active words (max 8)
-- `WORD_PINS[]` in `config.cpp` — maps each Word enum to an Arduino Mega pin
+- `WORD_PINS[]` in `config.cpp` — maps each Word enum to an Arduino Mega digital pin
+
+The LED board is wired **common cathode**: a shared bus wire connects all LED cathodes to GND, and each word group has its own anode wire driven directly by an Arduino digital pin (HIGH = word on).
 
 ## Customization Points
 
-All user-customizable values are in the top section of `config.h`: name word (`W_NAME`), birthday date, and cycle timing. Changing the name also requires updating the Word enum and `birthday.cpp`. See `docs/customization.md`.
+Birthday date and cycle timing are in the top section of `config.h`. The birthday words (HAPPY BIRTH DAY CHELSEA) are physically wired as a single daisy-chained group (`W_BIRTHDAY`). See `docs/customization.md`.
 
 ## Testing Approach
 

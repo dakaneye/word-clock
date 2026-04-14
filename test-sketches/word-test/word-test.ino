@@ -2,6 +2,8 @@
 // Type a word name in Serial Monitor to light it up.
 // Type "all" to light all words. Type "off" to turn all off.
 //
+// Board is common cathode: pin HIGH lights the word's LEDs directly.
+//
 // WORD_PINS is duplicated here because Arduino IDE copies sketches to a
 // temp directory before compiling, breaking relative #include paths.
 // If you change pin assignments in config.cpp, update this file too.
@@ -12,17 +14,17 @@ const char* WORD_NAMES[] = {
   "minutes", "past", "to", "one", "two", "three", "four",
   "fivehr", "six", "seven", "eight", "nine", "tenhr",
   "eleven", "twelve", "oclock", "am", "pm",
-  "happy", "birth", "chelsea", "day"
+  "birthday"
 };
 
 const int WORD_PINS[] = {
   2, 3, 4, 5, 6, 7, 8, 9, 10,     // IT_IS..TO
   22, 26, 13, 24, 33, 30, 28, 27,  // ONE..EIGHT
   29, 34, 23, 31, 35, 36, 37,      // NINE..PM
-  11, 12, 32, 25                    // HAPPY..DAY
+  11                                // BIRTHDAY
 };
 
-const int NUM_WORDS = 28;
+const int NUM_WORDS = 25;
 
 void allOff() {
   for (int i = 0; i < NUM_WORDS; i++) {
@@ -47,7 +49,7 @@ void setup() {
   Serial.println("Words: itis tenmin half quarter twenty fivemin minutes");
   Serial.println("       past to one two three four fivehr six seven");
   Serial.println("       eight nine tenhr eleven twelve oclock am pm");
-  Serial.println("       happy birth chelsea day");
+  Serial.println("       birthday");
 }
 
 void loop() {

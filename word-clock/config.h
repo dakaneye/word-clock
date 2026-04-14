@@ -7,11 +7,6 @@
 // See docs/customization.md for a walkthrough.
 // ============================================================
 
-// The name word on your clock face. Change the enum value and
-// update birthday.cpp to use your new enum value.
-// Example: rename W_CHELSEA to W_ALEX, update birthdayWords().
-#define W_NAME W_CHELSEA
-
 // Birthday: month and day to activate the birthday message
 const int BIRTHDAY_MONTH = 5;  // May
 const int BIRTHDAY_DAY = 4;
@@ -21,12 +16,13 @@ const unsigned long BIRTHDAY_CYCLE_MS = 5000;
 
 // ============================================================
 // WORD GRID — one enum value per word group on the clock face.
-// If you design a different front panel, adjust this enum and
-// update time_to_words.cpp + config.cpp to match.
+// Each word maps to one Arduino digital pin (see config.cpp).
+// The Arduino drives LEDs directly — no MOSFET modules needed.
+// Board is wired common cathode: bus wire = GND, word wires = anodes.
 // ============================================================
 
 enum Word {
-  // Time words — shared across all word clock builds
+  // Time words
   W_IT_IS = 0,
   W_TEN_MIN,
   W_HALF,
@@ -52,17 +48,17 @@ enum Word {
   W_AM,
   W_PM,
 
-  // Birthday/name words — change these for your recipient
-  W_HAPPY,
-  W_BIRTH,
-  W_CHELSEA,  // Replace with your recipient's name
-  W_DAY,
+  // Birthday words (HAPPY BIRTH DAY CHELSEA) — physically wired
+  // as one daisy-chained group sharing a single anode wire
+  W_BIRTHDAY,
 
   NUM_WORDS
 };
 
 // ============================================================
-// PIN ASSIGNMENTS — maps each word to an Arduino Mega pin.
+// PIN ASSIGNMENTS — maps each word to an Arduino Mega digital pin.
+// Each pin drives the word's anode wire directly (HIGH = word on).
+// The common cathode bus wire connects to Arduino GND.
 // Defined in config.cpp. Change there if you wire differently.
 // ============================================================
 
