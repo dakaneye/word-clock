@@ -50,15 +50,22 @@ void loop() {
   // Update display
   displayShow(ws);
 
-  // Print time to serial for debugging
-  static int lastMinute = -1;
-  if (ct.minute != lastMinute) {
-    lastMinute = ct.minute;
+  // Diagnostic: print time every second
+  static unsigned long lastDiagnostic = 0;
+  unsigned long now = millis();
+  if (now - lastDiagnostic >= 1000) {
+    lastDiagnostic = now;
+    Serial.print("ms=");
+    Serial.print(now);
+    Serial.print(" t=");
     Serial.print(ct.hour);
     Serial.print(":");
     if (ct.minute < 10) Serial.print("0");
     Serial.print(ct.minute);
-    Serial.println(ct.isPM ? " PM" : " AM");
+    Serial.print(":");
+    if (ct.second < 10) Serial.print("0");
+    Serial.print(ct.second);
+    Serial.println(ct.isPM ? "PM" : "AM");
   }
 
   delay(100);  // 10Hz update rate

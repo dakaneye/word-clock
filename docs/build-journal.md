@@ -243,24 +243,67 @@ The clock updates every 5 minutes. Birthday mode (May 4th) is untested but the b
 ### Parts that turned out to be unnecessary
 
 - 7x NOYITO 4-channel MOSFET modules → return
-- 6V power supply → wrong voltage, also unnecessary
-- 5V power supply → unnecessary (USB powers everything)
+- 5V power supply → unnecessary
 - DC barrel jack breakout adapter → unnecessary
 - Inline fuse holder + 3A fuse → unnecessary
 - 1000µF capacitor → unnecessary
-- M3 screws + nuts → unnecessary (no plastic insert mounting)
+- M3 screws + nuts → unnecessary (no plastic insert mounting needed)
 - 18 AWG copper wire for GND bus → unnecessary
 - Heat shrink tubing → unnecessary
 
-### What's left
+### Parts that DID get used
 
-- Solder the temporary test wires into permanent connections
-- Cut wires to proper length for clean routing
-- Figure out the button wiring (5 wires per button — need to identify which two are the switch contacts)
-- Mount everything in the frame
-- Power from a USB wall charger for permanent use
-- Update all the documentation (assembly guide, README, CLAUDE.md, config comments — everything says "common anode" and "MOSFET modules")
-- Test birthday mode on May 4th (or by temporarily setting the RTC date)
+- Arduino Mega 2560
+- DS3231 RTC module
+- 6V power supply (through the Arduino's barrel jack — the onboard regulator handles the 6V→5V drop despite being technically below the 7V spec. Works fine in practice, same as it did with the original Uno)
+- Hookup wire (yellow for all 28 word signals, black for GND, red for RTC VCC)
+- The existing LED board, buttons, and wooden frame from 2015
+- A multimeter (Klein MM325) — bought for this project, paid for itself ten times over
+
+### What got done
+
+- Labeled all 28 word groups using Arduino 5V + GND as a probe
+- Soldered permanent wires from each word's anode lead to the correct Arduino pin
+- Drilled two routing holes in the plastic insert (one for pins 2–13, one for pins 20+)
+- Wired the RTC (4 wires: VCC, GND, SDA→20, SCL→21)
+- Identified button switch contacts using multimeter continuity mode (white + green wires on 5-wire illuminated buttons — the other 3 wires are for the button LEDs, unused)
+- Wired both buttons (white→pin 38/39, green→GND)
+- Wired the common cathode bus to Arduino GND
+- Tested birthday mode by setting the RTC to May 4th — rainbow birthday LEDs alternate with the time display every 5 seconds
+- Powered via the 6V wall wart through the Arduino's barrel jack
+
+### The RTC is broken too
+
+After the clock was assembled and running, the time wasn't advancing. Added diagnostic output (printing RTC seconds + millis() every second) and got hard evidence:
+
+- 117 real seconds elapsed (millis)
+- RTC only counted 50 seconds
+- **The DS3231 oscillator is running at 43% speed**
+
+A healthy DS3231 drifts ±2 parts per million. This one is off by 57%. The crystal or oscillator circuit on the 11-year-old module has degraded. Not fixable in software.
+
+Replacement DS3231 module ordered ($8 for a 2-pack, arrives April 15).
+
+### Interim fix: millis()-based timekeeping
+
+Rather than wait for the replacement, we swapped `clock.cpp` to use the Arduino's own `millis()` for timekeeping. The Arduino Mega's 16MHz crystal drifts ~±4 seconds per day — more than adequate for a wall clock.
+
+Trade-offs vs RTC:
+- Time resets to midnight on any power loss or Arduino reset (including opening the serial port — learned this the hard way when a diagnostic check erased the time)
+- No date tracking, so birthday mode is disabled
+- Drift of ~4 seconds/day vs ~1 minute/year with a working DS3231
+
+Both issues go away when the replacement module arrives.
+
+Gotcha discovered during debugging: opening the serial port on macOS toggles the DTR line, which resets the Arduino Mega. With RTC-based timekeeping this is harmless (RTC remembers). With millis-based timekeeping, it wipes the clock. **Can't use serial monitoring without losing the time.** This made verifying the fix require trusting the display rather than reading serial output.
+
+### The final product (for now)
+
+A word clock that displays the time in English ("IT IS TWENTY FIVE TO THREE PM"), updates every 5 minutes, and has hour and minute buttons for time setting. Powered via the 6V wall wart through the Arduino Mega's barrel jack.
+
+Birthday mode (rainbow LEDs showing "HAPPY BIRTH DAY CHELSEA" on May 4th) was tested and works, but is disabled until the replacement RTC arrives (needs date tracking).
+
+Total active components: 1 Arduino Mega, ~100 white LEDs, a handful of rainbow birthday LEDs, 2 push buttons, 1 6V wall wart. No MOSFETs, no shift registers, no external driver ICs, no working RTC (temporarily). The Arduino's digital pins drive the LEDs directly and its crystal keeps time.
 
 ### Meta-observations
 
@@ -269,19 +312,27 @@ The clock updates every 5 minutes. Birthday mode (May 4th) is untested but the b
 - **Sunk cost bias nearly cost more time.** After buying 7 MOSFET modules, the instinct was to find a way to USE them (P-channel replacements, board rewiring, pull-up resistor hacks). The user cut through this by asking "what's the simplest path to completion?" The answer was "don't use MOSFETs at all."
 - **A 10-year-old project carries 10-year-old assumptions.** The original 2015 build used shift registers, which might have had a different driver topology. When the project was revived in 2026, the wiring description was reconstructed from memory, and "common anode" was either misremembered or confused with the shift register design. Nobody went back to the board to check.
 - **The multimeter paid for itself.** Without it, we'd still be guessing about wire connectivity and LED polarity. The diode test on individual LED legs was the single action that broke the impasse — not the voltage readings, not the continuity tests on wires, but a direct probe of the component itself.
+- **"Stop guessing and add a diagnostic" is always the right call.** I spent multiple rounds speculating about why the RTC was slow — dead battery, voltage sag, I2C hangs, button interference. Each theory was plausible but evidence-free. What actually worked: adding a one-line diagnostic print (millis + RTC seconds every second) that showed the oscillator running at 43% speed. Two minutes of data beat two hours of theorizing.
+- **Old hardware fails in unexpected ways.** LEDs last forever. Crystals don't. An 11-year-old DS3231 module with a dead battery and a degraded oscillator was the last failure mode anyone would predict — it's a "precision" component that was running at less than half speed. Lesson: test old components before building around them.
+- **Serial port resets are invisible until they bite you.** The DTR-triggered reset on serial open is well-known Arduino behavior, but its consequences change depending on your timekeeping strategy. With an RTC, it's harmless. With millis(), it destroys your clock state. This only became apparent after we'd already switched to the millis() approach — a consequence that wasn't obvious at design time.
+- **Don't upload throwaway sketches when the firmware can handle it.** I kept uploading separate time-setting sketches instead of using the buttons the user had already wired. The user rightly called this out. If the firmware has a feature (buttons for time-setting), use it.
 
 ---
 
 ## Running follow-up list
 
-- Update `docs/assembly-guide.md` — rewrite for common cathode + direct pin drive + USB power
+- ~~Solder permanent wires, cut to length, mount in frame~~ ✓
+- ~~Figure out button wiring~~ ✓ (white + green, multimeter continuity)
+- ~~Test birthday mode~~ ✓ (rainbow LEDs, alternating display)
+- Update `docs/assembly-guide.md` — rewrite for common cathode + direct pin drive
 - Update `CLAUDE.md` — project description says "MOSFET drivers"
 - Update `README.md` — hardware section lists MOSFET modules
 - Update `config.h` / `config.cpp` / `display.cpp` — comments reference common anode + MOSFET switching
 - Update `docs/customization.md` — hardware alternatives table references MOSFET approach
 - Update test sketches — labels reference MOSFET modules
-- Figure out button wiring (5 wires per button)
 - Collapse `W_HAPPY`/`W_BIRTH`/`W_DAY`/`W_CHELSEA` into `W_BIRTHDAY` (cosmetic, confirmed daisy-chained)
-- Test birthday mode (set RTC to May 4th)
-- Solder permanent wires, cut to length, mount in frame
 - Add "verify your board's polarity before designing the driver circuit" to the assembly guide
+- ~~Replace DS3231 module~~ ordered, arrives April 15 — swap module, revert clock.cpp to RTC version, set time, re-enable birthday mode
+- Remove diagnostic serial output from word-clock.ino (the seconds print) after RTC is verified
+- Return NOYITO MOSFET modules
+- Write the blog post

@@ -7,6 +7,7 @@
 struct ClockTime {
   int hour;    // 1-12
   int minute;  // 0-59
+  int second;  // 0-59
   bool isPM;
   int month;   // 1-12
   int day;     // 1-31
