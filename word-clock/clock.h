@@ -22,6 +22,9 @@ ClockTime clockRead();
 // Set time on RTC. hour24 is 0-23 format.
 void clockSet(int hour24, int minute);
 
+// Set full date and time on RTC from Unix epoch (seconds since 1970-01-01 UTC).
+void clockSetEpoch(uint32_t unixSeconds);
+
 // Advance hour by 1 (wraps). Writes to RTC.
 void clockAdvanceHour();
 

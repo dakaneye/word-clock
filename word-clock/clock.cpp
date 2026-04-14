@@ -1,64 +1,58 @@
 // word-clock/clock.cpp
-// Timekeeping using millis() — no RTC dependency.
-// Accurate to ~±4 seconds/day via the Arduino's crystal.
-// Time resets to 12:00 AM on power loss — set with buttons.
-// Replace with RTC-based implementation when a working DS3231 is available.
-
 #include "clock.h"
-#include <Arduino.h>
+#include <Wire.h>
+#include <RTClib.h>
 
-static unsigned long baseMillis = 0;
-static long baseSeconds = 0;  // seconds since midnight
-
-static long currentSeconds() {
-  unsigned long elapsed = millis() - baseMillis;
-  return (baseSeconds + (long)(elapsed / 1000)) % 86400L;
-}
+static RTC_DS3231 rtc;
 
 bool clockInit() {
-  baseMillis = millis();
-  baseSeconds = 0;  // midnight — user sets with buttons
-  return true;
+  Wire.begin();
+  return rtc.begin();
 }
 
 ClockTime clockRead() {
-  long secs = currentSeconds();
-  int h24 = (int)(secs / 3600);
-  int m = (int)((secs % 3600) / 60);
-  int s = (int)(secs % 60);
-
+  DateTime now = rtc.now();
   ClockTime ct;
+  int h24 = now.hour();
+  ct.minute = now.minute();
+  ct.second = now.second();
+  ct.month = now.month();
+  ct.day = now.day();
+
+  // Convert 24h to 12h
+  ct.isPM = (h24 >= 12);
   ct.hour = h24 % 12;
   if (ct.hour == 0) ct.hour = 12;
-  ct.minute = m;
-  ct.second = s;
-  ct.isPM = (h24 >= 12);
-  ct.month = 1;  // non-birthday month — birthday mode disabled without RTC
-  ct.day = 1;
+
   return ct;
 }
 
 void clockSet(int hour24, int minute) {
-  baseSeconds = (long)hour24 * 3600 + (long)minute * 60;
-  baseMillis = millis();
+  DateTime now = rtc.now();
+  rtc.adjust(DateTime(now.year(), now.month(), now.day(), hour24, minute, 0));
+}
+
+void clockSetEpoch(uint32_t unixSeconds) {
+  // RTClib's DateTime(uint32_t) takes Unix epoch (seconds since 1970) and
+  // internally subtracts SECONDS_FROM_1970_TO_2000. Pass it through.
+  rtc.adjust(DateTime(unixSeconds));
 }
 
 void clockAdvanceHour() {
-  long secs = currentSeconds();
-  baseSeconds = (secs + 3600) % 86400L;
-  baseMillis = millis();
+  DateTime now = rtc.now();
+  int h = (now.hour() + 1) % 24;
+  rtc.adjust(DateTime(now.year(), now.month(), now.day(), h, now.minute(), now.second()));
 }
 
 void clockAdvanceMinute5() {
-  long secs = currentSeconds();
-  int m = (int)((secs % 3600) / 60);
-  int h = (int)(secs / 3600);
-  m = m + 5;
+  DateTime now = rtc.now();
+  int m = now.minute() + 5;
+  int h = now.hour();
   if (m >= 60) {
     m -= 60;
     h = (h + 1) % 24;
   }
+  // Round down to nearest 5
   m = (m / 5) * 5;
-  baseSeconds = (long)h * 3600 + (long)m * 60;
-  baseMillis = millis();
+  rtc.adjust(DateTime(now.year(), now.month(), now.day(), h, m, 0));
 }

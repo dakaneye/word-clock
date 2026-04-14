@@ -319,6 +319,49 @@ Total active components: 1 Arduino Mega, ~100 white LEDs, a handful of rainbow b
 
 ---
 
+## 2026-04-14 — New RTC, time sync utility, and a sneaky RTClib API gotcha
+
+### Noon/midnight bug
+
+Before swapping the RTC, found and fixed an AM/PM bug in `time_to_words.cpp`: for minute blocks :35–:59, the code correctly picked up `nextHour(hour)` for the displayed hour word, but still used the current hour's `isPM` for the AM/PM word. At 11:35 PM the clock said "TWENTY FIVE MINUTES TO TWELVE PM" instead of "…TO TWELVE AM," and symmetrically around noon. Fix: flip `isPM` for the AM/PM word only when `fiveBlock >= 7 && hour == 11`. Added 14 boundary tests (all five affected blocks in both periods plus guards at 11:30 and 12:35). Coverage is now 54/54.
+
+### Replacement RTC arrived
+
+Fresh DS3231 in the mail. Wired it up (VCC/GND/SDA=20/SCL=21), reverted `clock.cpp` to the RTC version from commit `aa61ed5`, confirmed it compiled. The millis-based timekeeping code is gone entirely — no dead helpers, no orphan statics.
+
+### The time-set utility
+
+Setting time via buttons is tedious and inaccurate — wanted a `make set-time` that uploads the firmware and then syncs the RTC to the host system's wall clock in one step. Built:
+
+- Firmware: a 3-second listen window at the end of `setup()` that accepts `T<unix_seconds>\n` from the host.
+- `scripts/set_time.sh`: opens the serial port once, waits for the Arduino to boot through the DTR reset, sends the local-wall-clock time expressed as Unix epoch, and captures the Arduino's response so we can see what actually happened.
+- Root `Makefile` with `build`, `upload`, `set-time`, `test`, `clean` targets.
+
+First try: `stty` and `printf >` each reopened the serial port, triggering a DTR reset every time, so the Arduino never finished its listen window before being reset again. Fix: `exec 3<>"$PORT"` to hold the port open on a single fd, then write through fd 3 for everything.
+
+### The RTClib API gotcha
+
+After the sync "worked" — Arduino confirmed receiving the correct epoch, printed "Time synced" — the display immediately jumped to 4:02 PM while we'd sent 9:34 AM. ~6.5 hours off. Added diagnostic read-back and saw this:
+
+```
+will write y/m/d h:m:s = 2132/5/20 16:4:24
+read back    y/m/d h:m:s = 2132/5/20 16:4:24
+```
+
+The write and read agree, but year 2132 is nonsense. Turns out RTClib's `DateTime(uint32_t t)` expects `t` to be Unix epoch (seconds since 1970), not seconds since 2000. I'd been subtracting the 1970→2000 offset in `clockSetEpoch` under the wrong assumption, causing uint32_t underflow when the library did its own subtraction internally. Removed the subtraction, passed the Unix epoch straight through. Time now lands correctly.
+
+Same lesson as the common-anode bug from April 13: **the docs I was holding in my head were wrong, and the fix was to look at the actual behavior.** I'd assumed the RTClib constructor semantics from reading somewhere, never verified. Two lines of read-back diagnostic dissolved the confusion in one upload cycle.
+
+### Drift
+
+The millis-based clock had drifted almost two minutes overnight (documented as ~4 sec/day worst case, in practice worse under load). The DS3231 is spec'd at ±2 ppm — ~0.17 sec/day, ~1 minute/year. That drift is invisible at a wall-clock timescale.
+
+### What shipped
+
+Two commits on main:
+- `fix(time): flip AM/PM when crossing noon/midnight boundary`
+- (about to commit) RTC restore, time-sync utility, and the RTClib API fix
+
 ## Running follow-up list
 
 - ~~Solder permanent wires, cut to length, mount in frame~~ ✓
@@ -332,7 +375,7 @@ Total active components: 1 Arduino Mega, ~100 white LEDs, a handful of rainbow b
 - Update test sketches — labels reference MOSFET modules
 - Collapse `W_HAPPY`/`W_BIRTH`/`W_DAY`/`W_CHELSEA` into `W_BIRTHDAY` (cosmetic, confirmed daisy-chained)
 - Add "verify your board's polarity before designing the driver circuit" to the assembly guide
-- ~~Replace DS3231 module~~ ordered, arrives April 15 — swap module, revert clock.cpp to RTC version, set time, re-enable birthday mode
+- ~~Replace DS3231 module~~ ✓ swapped in a fresh DS3231, reverted clock.cpp to RTC version, set time via new `make set-time`, birthday mode re-enabled (dates now valid)
 - Remove diagnostic serial output from word-clock.ino (the seconds print) after RTC is verified
 - Return NOYITO MOSFET modules
 - Write the blog post
