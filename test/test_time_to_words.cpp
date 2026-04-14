@@ -166,6 +166,64 @@ void testHourWrapAround() {
   expectWords(12, 35, false, expected2, 7);
 }
 
+void testNoonMidnightBoundary() {
+  // 11:35 AM -> approaching noon, so "TO TWELVE PM" (not AM)
+  int e1[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_TO, W_TWELVE, W_PM};
+  expectWords(11, 35, false, e1, 7);
+
+  // 11:40 AM -> TWENTY MINUTES TO TWELVE PM
+  int e2[] = {W_IT_IS, W_TWENTY, W_MINUTES, W_TO, W_TWELVE, W_PM};
+  expectWords(11, 40, false, e2, 6);
+
+  // 11:45 AM -> QUARTER TO TWELVE PM
+  int e3[] = {W_IT_IS, W_QUARTER, W_TO, W_TWELVE, W_PM};
+  expectWords(11, 45, false, e3, 5);
+
+  // 11:50 AM -> TEN MINUTES TO TWELVE PM
+  int e4[] = {W_IT_IS, W_TEN_MIN, W_MINUTES, W_TO, W_TWELVE, W_PM};
+  expectWords(11, 50, false, e4, 6);
+
+  // 11:55 AM -> FIVE MINUTES TO TWELVE PM
+  int e5[] = {W_IT_IS, W_FIVE_MIN, W_MINUTES, W_TO, W_TWELVE, W_PM};
+  expectWords(11, 55, false, e5, 6);
+
+  // 11:35 PM -> approaching midnight, so "TO TWELVE AM" (not PM)
+  int e6[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_TO, W_TWELVE, W_AM};
+  expectWords(11, 35, true, e6, 7);
+
+  // 11:40 PM -> TWENTY MINUTES TO TWELVE AM
+  int e7[] = {W_IT_IS, W_TWENTY, W_MINUTES, W_TO, W_TWELVE, W_AM};
+  expectWords(11, 40, true, e7, 6);
+
+  // 11:45 PM -> QUARTER TO TWELVE AM
+  int e8[] = {W_IT_IS, W_QUARTER, W_TO, W_TWELVE, W_AM};
+  expectWords(11, 45, true, e8, 5);
+
+  // 11:50 PM -> TEN MINUTES TO TWELVE AM
+  int e9[] = {W_IT_IS, W_TEN_MIN, W_MINUTES, W_TO, W_TWELVE, W_AM};
+  expectWords(11, 50, true, e9, 6);
+
+  // 11:55 PM -> FIVE MINUTES TO TWELVE AM
+  int e10[] = {W_IT_IS, W_FIVE_MIN, W_MINUTES, W_TO, W_TWELVE, W_AM};
+  expectWords(11, 55, true, e10, 6);
+
+  // Guard: 11:30 AM is HALF PAST ELEVEN AM — don't accidentally flip
+  int e11[] = {W_IT_IS, W_HALF, W_PAST, W_ELEVEN, W_AM};
+  expectWords(11, 30, false, e11, 5);
+
+  // Guard: 11:30 PM is HALF PAST ELEVEN PM
+  int e12[] = {W_IT_IS, W_HALF, W_PAST, W_ELEVEN, W_PM};
+  expectWords(11, 30, true, e12, 5);
+
+  // Guard: 12:35 PM is TWENTY FIVE TO ONE PM — don't flip at noon hour
+  int e13[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_TO, W_ONE, W_PM};
+  expectWords(12, 35, true, e13, 7);
+
+  // Guard: 12:35 AM is TWENTY FIVE TO ONE AM
+  int e14[] = {W_IT_IS, W_TWENTY, W_FIVE_MIN, W_MINUTES, W_TO, W_ONE, W_AM};
+  expectWords(12, 35, false, e14, 7);
+}
+
 void testAllHoursAtOclock() {
   int hours[] = {W_ONE, W_TWO, W_THREE, W_FOUR, W_FIVE_HR, W_SIX,
                  W_SEVEN, W_EIGHT, W_NINE, W_TEN_HR, W_ELEVEN, W_TWELVE};
@@ -247,6 +305,7 @@ int main() {
   testTenTo();
   testFiveTo();
   testHourWrapAround();
+  testNoonMidnightBoundary();
   testAllHoursAtOclock();
   testBoundaryMinutes();
   testAmPmToggle();

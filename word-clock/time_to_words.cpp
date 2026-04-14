@@ -115,8 +115,14 @@ WordSet timeToWords(int hour, int minute, bool isPM) {
       break;
   }
 
-  // AM or PM
-  ws.words[ws.count++] = isPM ? W_PM : W_AM;
+  // AM or PM — flip when we're saying "TO [next hour]" and that next hour
+  // is 12, which means we're crossing the AM/PM boundary (11:35-11:59 AM
+  // approaches noon, 11:35-11:59 PM approaches midnight).
+  bool displayIsPM = isPM;
+  if (fiveBlock >= 7 && hour == 11) {
+    displayIsPM = !isPM;
+  }
+  ws.words[ws.count++] = displayIsPM ? W_PM : W_AM;
 
   return ws;
 }
