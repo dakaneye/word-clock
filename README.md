@@ -7,7 +7,7 @@ An Arduino-powered word clock that displays time in English words on a laser-cut
 
 Includes a birthday mode that alternates "HAPPY BIRTH DAY CHELSEA" with the time display on May 4th. The birthday LEDs are multicolored (rainbow).
 
-Inspired by [this reddit post](https://www.reddit.com/r/DIY/comments/2ao9yt/i_built_this_word_clock_for_my_brother_and_his/) and [build gallery](https://imgur.com/a/iMXmj). The original project started in 2015 and was revived in 2026 with a simpler hardware design (MOSFET modules instead of shift registers).
+Inspired by [this reddit post](https://www.reddit.com/r/DIY/comments/2ao9yt/i_built_this_word_clock_for_my_brother_and_his/) and [build gallery](https://imgur.com/a/iMXmj). The original project started in 2015 and was revived in 2026 with a simpler hardware design (direct pin drive instead of shift registers).
 
 **Want to build your own?** See the [Customization Guide](docs/customization.md) — swap in any name, birthday, or word layout.
 
@@ -42,7 +42,7 @@ T E N O C L O C K A M P M
 word-clock/         Arduino sketch
   config.h/cpp      Pin assignments, word enum
   time_to_words     Pure logic: hour+minute -> which words light up
-  display           MOSFET pin control
+  display           Direct pin drive (HIGH = word on)
   clock             DS3231 RTC read/write
   buttons           Debounce + hold-repeat
   birthday          May 4th alternating display
